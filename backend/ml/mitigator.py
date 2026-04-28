@@ -1,5 +1,5 @@
 from fairlearn.postprocessing import ThresholdOptimizer
-from backend.ml.analyzer import calculate_bias_score
+from ml.analyzer import calculate_bias_score
 
 def apply_mitigation(model_info):
     """

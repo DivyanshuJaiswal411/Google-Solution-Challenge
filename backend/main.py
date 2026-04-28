@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import io
 
-from backend.ml import analyzer, mitigator, simulator
-from backend.services import gemini_explainer
+from ml import analyzer, mitigator, simulator
+from services import gemini_explainer
 
 app = FastAPI(title="FairSight API")
 
@@ -102,16 +102,15 @@ async def counterfactual_flip_test(user_idx: int):
     flipped_sensitive_val = 1 if original_sensitive_val == 0 else 0
     flipped_user = original_user.copy()
     
-    # Note: In our current setup, sensitive_features was taken out of X_test for Fairlearn.
-    # If the model was trained WITHOUT sensitive feature but proxy variables caused bias, 
-    # we'd alter highly correlated proxy features. 
-    # For a direct flip test demo, we assume the sensitive feature might have leaked or we flip a correlated feature.
-    # To simulate the "Wow Factor" for the demo, we will forcibly show the probability shift 
-    # as if we flipped the attribute and ran through a baseline biased model.
+    # If the sensitive column is in the features, actually flip it
+    if sensitive_col in flipped_user.columns:
+        flipped_user[sensitive_col] = flipped_sensitive_val
     
-    # Mocking probability shift for the hackathon demo effect:
+    # Calculate original probability
     original_prob = float(model.predict_proba(original_user)[0][1])
-    flipped_prob = original_prob + 0.25 if original_pred == 0 else original_prob - 0.25
+    
+    # Predict with flipped features
+    flipped_prob = float(model.predict_proba(flipped_user)[0][1])
     flipped_pred = 1 if flipped_prob >= 0.5 else 0
     
     return {

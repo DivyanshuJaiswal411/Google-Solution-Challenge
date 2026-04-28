@@ -1,5 +1,5 @@
 import numpy as np
-from backend.ml.analyzer import calculate_bias_score
+from ml.analyzer import calculate_bias_score
 from sklearn.metrics import accuracy_score
 from fairlearn.metrics import demographic_parity_difference, equalized_odds_difference
 
